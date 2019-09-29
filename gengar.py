@@ -30,7 +30,7 @@ class Gengar:
                 print('Exiting')
                 break
             print(self.shell(shell_cmd))
-    
+
     def __repr__(self):
         ip, port = self.sock.getpeername()
         return f'Gengar at {ip}'

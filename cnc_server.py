@@ -16,11 +16,11 @@ class CNCServer:
         print('Waiting for connections.')
         accept_worker = threading.Thread(target=self.accept)
         accept_worker.start()
-    
+
     def accept(self):
         while True:
-            conn, addr = self.sock.accept()
-            print(f'Got connection from: {addr}.')
+            conn, (ip, port) = self.sock.accept()
+            print(f'Got connection from: {ip}.')
             self.control(conn)
 
     def control(self, conn):
@@ -30,5 +30,4 @@ class CNCServer:
         self.sock.close()
 
     def fetch_hostnames(self):
-        return [gengar.fetch_hostname() for gengar in self.gengars]
-
+        return [gengar.hostname() for gengar in self.gengars]
