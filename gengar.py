@@ -21,6 +21,13 @@ class Gengar:
         self._send(payload)
         return self._recv()
 
+    def lock_workstation(self):
+        self.shell('rundll32 user32.dll,LockWorkStation')
+
+    def msgbox(self, title, content):
+        payload = json.dumps(dict(cmd='msgbox', title=title, content=content))
+        self._send(payload)
+
     def download(self, remote_path, local_path):
         payload = json.dumps(dict(cmd='download', path=remote_path))
         self._send(payload)
