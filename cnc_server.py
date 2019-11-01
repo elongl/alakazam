@@ -14,17 +14,14 @@ class CNCServer:
     def listen(self):
         self._sock.listen(1)
         print('Waiting for connections.')
-        accept_worker = threading.Thread(target=self.accept)
+        accept_worker = threading.Thread(target=self._accept, daemon=True)
         accept_worker.start()
 
-    def accept(self):
+    def _accept(self):
         while True:
             conn, (ip, port) = self._sock.accept()
             print(f'Gengar spawned at {ip}')
-            self.control(conn)
-
-    def control(self, conn):
-        self.gengars.append(Gengar(conn))
+            self.gengars.append(Gengar(conn))
 
     def close(self):
         self._sock.close()

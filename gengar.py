@@ -54,6 +54,13 @@ class Gengar:
                 break
             print(self.shell(shell_cmd))
 
+    def is_alive(self):
+        try:
+            self.shell('test')
+            return True
+        except ConnectionResetError:
+            return False
+
     def __repr__(self):
         ip, port = self._sock.getpeername()
         return f'Gengar at {ip}'
