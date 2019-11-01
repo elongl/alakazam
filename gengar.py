@@ -82,7 +82,7 @@ class Gengar:
         self.shell('psr /stop')
         print('Flushing record')
         time.sleep(5)
-        self.download(record_output_path, local_output_path, delete=False)
+        self.download(record_output_path, local_output_path, delete=True)
 
     def __repr__(self):
         ip, port = self._sock.getpeername()
