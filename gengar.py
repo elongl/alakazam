@@ -9,9 +9,12 @@ class Gengar:
         self._sock.send(str(len(data)).encode())
         self._sock.send(data.encode())
 
-    def _recv(self):
+    def _recv(self, binary=False):
         buff_len = int(self._sock.recv(128).decode())
-        return self._sock.recv(buff_len).decode().strip()
+        if binary:
+            return self._sock.recv(buff_len)
+        else:
+            return self._sock.recv(buff_len).decode().strip()
 
     def shell(self, cmd):
         payload = json.dumps(dict(cmd='shell', content=cmd))
@@ -22,7 +25,7 @@ class Gengar:
         payload = json.dumps(dict(cmd='download', path=remote_path))
         self._send(payload)
         with open(local_path, 'wb') as _file:
-            _file.write(self._recv().encode())
+            _file.write(self._recv(binary=True))
 
     def upload(self, local_path, remote_path):
         payload = json.dumps(dict(cmd='upload', path=remote_path, data=open(local_path, 'rb').read().decode()))
