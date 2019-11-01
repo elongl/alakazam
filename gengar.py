@@ -37,7 +37,7 @@ class Gengar:
     def download(self, remote_path, local_path=None, delete=False):
         payload = json.dumps(dict(cmd='download', path=remote_path))
         file_path = local_path if local_path else output.generate_product_path('file_download')
-        print(f'Downloading {remote_path} to {local_path}')
+        print(f'Downloading {remote_path} to {file_path}')
         self._send(payload)
         with open(file_path, 'wb') as _file:
             _file.write(self._recv(binary=True))
