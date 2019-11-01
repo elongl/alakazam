@@ -55,12 +55,12 @@ class Gengar:
         self._send(payload)
         self._sock.close()
 
-    def hostname(self):
-        return self.shell('hostname')
+    def username(self):
+        return self.shell('echo %username%')
 
     def interactive_shell(self):
         while True:
-            shell_cmd = input(f'{self.hostname()}$ ')
+            shell_cmd = input(f'{self.username()}$ ')
             if shell_cmd == 'exit':
                 print('Exiting')
                 break
@@ -86,4 +86,4 @@ class Gengar:
 
     def __repr__(self):
         ip, port = self._sock.getpeername()
-        return f'Gengar at {ip}'
+        return f'Gengar at {self.username()}'

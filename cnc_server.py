@@ -26,5 +26,5 @@ class CNCServer:
     def close(self):
         self._sock.close()
 
-    def fetch_hostnames(self):
-        return [gengar.hostname() for gengar in self.gengars]
+    def fetch_usernames(self):
+        return [gengar.username() for gengar in self.gengars]
