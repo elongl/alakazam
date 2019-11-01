@@ -42,7 +42,7 @@ class Gengar:
         with open(file_path, 'wb') as _file:
             _file.write(self._recv(binary=True))
         if delete:
-            self.shell(f'del /F {remote_path}')
+            self.shell(f'del /F "{remote_path}"')
 
     def upload(self, local_path, remote_path):
         print(f'Uploading {local_path} to {remote_path}')
@@ -77,9 +77,12 @@ class Gengar:
         record_output_path = r'C:\Windows\Temp\tmp947.zip'
         local_output_path = output.generate_product_path('psr', extension='zip')
         self.shell(f'start /b psr /start /gui 0 /output "{record_output_path}"')
+        print(f'Recording for {timeout} seconds.')
         time.sleep(timeout)
         self.shell('psr /stop')
-        self.download(record_output_path, local_output_path, delete=True)
+        print('Flushing record')
+        time.sleep(5)
+        self.download(record_output_path, local_output_path, delete=False)
 
     def __repr__(self):
         ip, port = self._sock.getpeername()
