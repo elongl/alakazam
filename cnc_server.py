@@ -28,3 +28,6 @@ class CNCServer:
 
     def fetch_usernames(self):
         return [gengar.username() for gengar in self.gengars]
+
+    def filter_dead_gengars(self):
+        return [gengar for gengar in self.gengars if gengar.is_alive()]
