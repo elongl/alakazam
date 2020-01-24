@@ -41,7 +41,7 @@ class Gengar:
                     break
 
     def msgbox(self, content):
-        self._sock.send((CommandTypes.MSGBOX + content).encode())
+        self._sock.send(CommandTypes.MSGBOX + content.encode())
 
     def lock_workstation(self):
         print('Locking workstation')
