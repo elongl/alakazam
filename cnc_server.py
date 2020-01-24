@@ -19,7 +19,7 @@ class CNCServer:
 
     def _accept(self):
         while True:
-            conn, (ip, port) = self._sock.accept()
+            conn, (ip, _) = self._sock.accept()
             print(f'Gengar spawned at {ip}')
             self.gengars.append(Gengar(conn))
 
