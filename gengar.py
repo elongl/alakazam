@@ -20,7 +20,7 @@ class Gengar:
         return self._sock.recv(8192).decode().strip()
 
     def msgbox(self, content):
-        self._sock.send(CommandTypes.MSGBOX + content)
+        self._sock.send((CommandTypes.MSGBOX + content).encode())
 
     def lock_workstation(self):
         print('Locking workstation')
