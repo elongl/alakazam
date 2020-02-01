@@ -5,10 +5,9 @@ from gengar import Gengar
 
 
 class CNCServer:
-    _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    gengars = []
-
     def __init__(self):
+        self.gengars = []
+        self._sock = socket.socket()
         self._sock.bind(('0.0.0.0', 27016))
 
     def listen(self):
