@@ -8,6 +8,7 @@ class CNCServer:
     def __init__(self):
         self.gengars = []
         self._sock = socket.socket()
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind(('0.0.0.0', 27016))
 
     def listen(self):
