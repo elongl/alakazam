@@ -21,8 +21,8 @@ class CNCServer:
         threading.Thread(target=self.accept_forever, daemon=True).start()
 
     def accept_forever(self):
+        logger.info('Waiting for connections.')
         while True:
-            logger.info('Waiting for connections.')
             gengar_sock, (gengar_host, _) = self.sock.accept()
             logger.info(f'Received Gengar connection @ {gengar_host}')
             self.gengars.append(Gengar(gengar_sock, gengar_host))

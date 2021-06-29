@@ -1,6 +1,7 @@
 import socket
 import struct
 from dataclasses import dataclass
+from logging import log
 
 from logger import logger
 
@@ -26,5 +27,9 @@ class Gengar:
     def shell(self, cmd: str):
         logger.info(f'Running: {cmd}')
         self.sock.send(struct.pack('I', CommandTypes.SHELL) + struct.pack('I', len(cmd)) + cmd.encode())
+        exit_code = struct.unpack('i', self.sock.recv(INT_SIZE))[0]
+        if exit_code == -1:
+            logger.error('Gengar failed to execute the shell command.')
+            return
         output_size = struct.unpack('I', self.sock.recv(INT_SIZE))
-        logger.info(f'Command output: {self.sock.recv(output_size)}')
+        logger.info(f'Command output ({exit_code}): {self.sock.recv(output_size)}')
