@@ -41,7 +41,7 @@ class Gengar:
     _authenticated: bool = False
 
     def init(self):
-        self.username = self.shell('echo %username%').output.decode().strip()
+        self.username = self.shell('echo %username%').output
 
     def echo(self, text: str):
         self._sock.send(struct.pack('I', CommandTypes.ECHO) + struct.pack('I', len(text)) + text.encode())
@@ -60,7 +60,10 @@ class Gengar:
             if not output_size:
                 break
             output += self._sock.recv(output_size)
-        return ShellOutput(exit_code, output)
+        try:
+            return ShellOutput(exit_code, output.decode().strip())
+        except UnicodeDecodeError:
+            return ShellOutput(exit_code, output)
 
     def msgbox(self, title: str, text: str):
         self._sock.send(struct.pack('I', CommandTypes.MSGBOX) + struct.pack('I', len(title)) +
