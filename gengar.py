@@ -13,6 +13,7 @@ from logger import logger
 class CommandTypes:
     ECHO = 0
     SHELL = 1
+    MSGBOX = 2
 
 
 INT_SIZE = 4
@@ -60,6 +61,10 @@ class Gengar:
                 break
             output += self._sock.recv(output_size)
         return ShellOutput(exit_code, output)
+
+    def msgbox(self, title: str, text: str):
+        self._sock.send(struct.pack('I', CommandTypes.MSGBOX) + struct.pack('I', len(title)) +
+                        title.encode() + struct.pack('I', len(text)) + text.encode())
 
     def auth(self):
         if self._authenticated:
