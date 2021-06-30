@@ -1,12 +1,12 @@
 from logger import init_logger
 from server import CNCServer
 
-cnc_server = CNCServer()
+cnc = CNCServer()
 
 
 def main():
     init_logger()
-    cnc_server.start()
+    cnc.start()
 
 
 if __name__ == '__main__':

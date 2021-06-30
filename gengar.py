@@ -25,11 +25,17 @@ class Gengar:
         logger.info(f'Received from echo: {self.sock.recv(len(text)).decode()}')
 
     def shell(self, cmd: str):
+        output = b''
         logger.info(f'Running: {cmd}')
         self.sock.send(struct.pack('I', CommandTypes.SHELL) + struct.pack('I', len(cmd)) + cmd.encode())
         exit_code = struct.unpack('i', self.sock.recv(INT_SIZE))[0]
         if exit_code == -1:
             logger.error('Gengar failed to execute the shell command.')
             return
-        output_size = struct.unpack('I', self.sock.recv(INT_SIZE))
-        logger.info(f'Command output ({exit_code}): {self.sock.recv(output_size)}')
+        while True:
+            output_size = struct.unpack('I', self.sock.recv(INT_SIZE))[0]
+            if not output_size:
+                break
+            output += self.sock.recv(output_size)
+        logger.info(f'-> ({exit_code}): {output}')
+        return output
