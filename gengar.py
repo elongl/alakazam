@@ -74,6 +74,9 @@ class Gengar:
         self._sock.close()
         self.alive = False
 
+    def lock_workstation(self):
+        self.shell('rundll32.exe user32.dll,LockWorkStation')
+
     def auth(self):
         if self._authenticated:
             logger.info('Gengar already authenticated.')
