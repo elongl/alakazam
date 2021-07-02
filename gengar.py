@@ -19,11 +19,13 @@ INT_SIZE = 4
 
 
 class GengarAuthenticationFailed(Exception):
-    pass
+    def __str__(self) -> str:
+        return 'Failed to authenticate Gengar with the CNC.'
 
 
 class GengarDisconnected(Exception):
-    pass
+    def __str__(self) -> str:
+        return 'Gengar has disconnected from the CNC.'
 
 
 @dataclass
