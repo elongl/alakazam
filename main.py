@@ -1,5 +1,5 @@
+from cnc_server import CNCServer
 from logger import init_logger
-from server import CNCServer
 
 cnc = CNCServer()
 

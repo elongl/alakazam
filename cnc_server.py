@@ -8,11 +8,19 @@ from logger import logger
 
 class CNCServer:
     DEFAULT_PORT = 5000
-    gengars = []
+    _gengars = []
 
     def __init__(self, port=DEFAULT_PORT):
         self.sock = socket.socket()
         self.port = port
+
+    @property
+    def gengars(self):
+        return [gengar for gengar in self._gengars if gengar.alive]
+
+    @property
+    def dead_gengars(self):
+        return [gengar for gengar in self._gengars if not gengar.alive]
 
     def start(self):
         logger.info(f'Starting the CNC server at :{self.port}')
@@ -30,7 +38,7 @@ class CNCServer:
             try:
                 gengar.auth()
                 gengar.init()
-                self.gengars.append(gengar)
+                self._gengars.append(gengar)
             except GengarAuthenticationFailed:
                 logger.error('Failed to authenticate Gengar.')
                 gengar_sock.close()
