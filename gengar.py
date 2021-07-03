@@ -50,6 +50,8 @@ class Gengar:
         self.username = self.shell('echo %username%').output
 
     def _send(self, buf: bytes):
+        if not self.alive:
+            raise GengarDisconnected
         try:
             self._sock.send(buf)
         except ConnectionError:
@@ -57,6 +59,8 @@ class Gengar:
             raise GengarDisconnected from None
 
     def _recv(self, bufsize: int):
+        if not self.alive:
+            raise GengarDisconnected
         try:
             return self._sock.recv(bufsize)
         except ConnectionError:
