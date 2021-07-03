@@ -34,7 +34,7 @@ class CNCServer:
         while True:
             gengar_sock, (gengar_host, _) = self.sock.accept()
             logger.info(f'Received Gengar connection @ {gengar_host}')
-            gengar = Gengar(gengar_sock, gengar_host, datetime.now())
+            gengar = Gengar(gengar_sock, gengar_host)
             try:
                 gengar.auth()
                 gengar.init()
