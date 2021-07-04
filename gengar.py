@@ -54,7 +54,7 @@ class Gengar:
             raise GengarDisconnected
 
         try:
-            self._sock.send(buf)
+            self._sock.sendall(buf)
         except ConnectionError:
             self.alive = False
             raise GengarDisconnected from None
