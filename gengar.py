@@ -52,6 +52,7 @@ class Gengar:
     def _send(self, buf: bytes):
         if not self.alive:
             raise GengarDisconnected
+
         try:
             self._sock.send(buf)
         except ConnectionError:
@@ -61,15 +62,29 @@ class Gengar:
     def _recv(self, bufsize: int):
         if not self.alive:
             raise GengarDisconnected
+
         try:
             return self._sock.recv(bufsize)
         except ConnectionError:
             self.alive = False
             raise GengarDisconnected from None
 
+    def _recvall(self, bufsize: int):
+        data = b''
+        bytes_remaining = bufsize
+        try:
+            while bytes_remaining:
+                data_chunk = self._recv(bytes_remaining)
+                data += data_chunk
+                bytes_remaining -= len(data_chunk)
+            return data
+        except ConnectionError:
+            self.alive = False
+            raise GengarDisconnected from None
+
     def echo(self, text: str):
         self._send(struct.pack('I', CommandTypes.ECHO) + struct.pack('I', len(text)) + text.encode())
-        output = self._recv(len(text)).decode()
+        output = self._recvall(len(text)).decode()
         return output
 
     def shell(self, cmd: str):
