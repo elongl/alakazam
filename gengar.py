@@ -91,7 +91,7 @@ class Gengar:
             if not output_size:
                 exit_code = struct.unpack('i', self._recv(INT_SIZE))[0]
                 break
-            output += self._recvall(output_size)
+            output += self._recv(output_size)
 
         try:
             return ShellOutput(exit_code, output.decode().strip())
