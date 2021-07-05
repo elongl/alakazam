@@ -112,6 +112,9 @@ class Gengar:
     def lock_workstation(self):
         self.shell('rundll32.exe user32.dll,LockWorkStation')
 
+    def process_list(self):
+        return self.shell('tasklist').output
+
     def auth(self):
         if self._authenticated:
             logger.info('Gengar already authenticated.')
