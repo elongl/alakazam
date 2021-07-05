@@ -86,15 +86,13 @@ class Gengar:
     def shell(self, cmd: str):
         output = b''
         self._send(struct.pack('I', CommandTypes.SHELL) + struct.pack('I', len(cmd)) + cmd.encode())
-        exit_code = struct.unpack('i', self._recv(INT_SIZE))[0]
-        if exit_code == -1:
-            logger.error('Gengar failed to execute the shell command.')
-            return
         while True:
             output_size = struct.unpack('I', self._recv(INT_SIZE))[0]
             if not output_size:
+                exit_code = struct.unpack('i', self._recv(INT_SIZE))[0]
                 break
             output += self._recvall(output_size)
+
         try:
             return ShellOutput(exit_code, output.decode().strip())
         except UnicodeDecodeError:
