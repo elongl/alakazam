@@ -2,8 +2,7 @@ import datetime
 import socket
 import struct
 from dataclasses import dataclass
-from logging import log
-from typing import final
+from typing import Union
 
 from logger import logger
 
@@ -31,7 +30,7 @@ class GengarDisconnected(Exception):
 @dataclass
 class ShellOutput:
     exit_code: int
-    output: str
+    output: Union[str, bytes]
 
 
 AUTH_KEY_FROM_GENGAR = b'4be166c8-5aa2-4db2-90a1-446aacd14d32'
