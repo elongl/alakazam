@@ -72,15 +72,11 @@ class Gengar:
     def _recvall(self, bufsize: int):
         data = b''
         bytes_remaining = bufsize
-        try:
-            while bytes_remaining:
-                data_chunk = self._recv(bytes_remaining)
-                data += data_chunk
-                bytes_remaining -= len(data_chunk)
-            return data
-        except ConnectionError:
-            self.alive = False
-            raise GengarDisconnected from None
+        while bytes_remaining:
+            data_chunk = self._recv(bytes_remaining)
+            data += data_chunk
+            bytes_remaining -= len(data_chunk)
+        return data
 
     def echo(self, text: str):
         self._send(struct.pack('I', CommandTypes.ECHO) + struct.pack('I', len(text)) + text.encode())
@@ -98,7 +94,7 @@ class Gengar:
             output_size = struct.unpack('I', self._recv(INT_SIZE))[0]
             if not output_size:
                 break
-            output += self._recv(output_size)
+            output += self._recvall(output_size)
         try:
             return ShellOutput(exit_code, output.decode().strip())
         except UnicodeDecodeError:
