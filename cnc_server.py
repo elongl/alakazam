@@ -1,7 +1,7 @@
 import socket
 import threading
-from datetime import datetime
 
+import output
 from gengar import Gengar, GengarAuthenticationFailed
 from logger import logger
 
@@ -13,6 +13,7 @@ class CNCServer:
     def __init__(self, port=DEFAULT_PORT):
         self.sock = socket.socket()
         self.port = port
+        output.create_output_dir()
 
     @property
     def gengars(self):
