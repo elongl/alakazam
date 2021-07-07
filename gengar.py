@@ -90,11 +90,11 @@ class Gengar:
         output = b''
         self._send(struct.pack('I', CommandTypes.SHELL) + struct.pack('I', len(cmd)) + cmd.encode())
         while True:
-            output_size = struct.unpack('I', self._recv(INT_SIZE))[0]
+            output_size = struct.unpack('I', self._recvall(INT_SIZE))[0]
             if not output_size:
-                exit_code = struct.unpack('i', self._recv(INT_SIZE))[0]
+                exit_code = struct.unpack('i', self._recvall(INT_SIZE))[0]
                 break
-            output += self._recv(output_size)
+            output += self._recvall(output_size)
 
         try:
             return ShellOutput(exit_code, output.decode().strip())
@@ -110,12 +110,12 @@ class Gengar:
 
         self._send(struct.pack('I', CommandTypes.DOWNLOAD_FILE) +
                    struct.pack('I', len(remote_path)) + remote_path.encode())
-        return_code = struct.unpack('I', self._recv(INT_SIZE))[0]
+        return_code = struct.unpack('I', self._recvall(INT_SIZE))[0]
         if return_code != 0:
             logger.error(f'Failed to download file: {return_code}')
             return
 
-        bytes_remaining = struct.unpack('Q', self._recv(LONG_SIZE))[0]
+        bytes_remaining = struct.unpack('Q', self._recvall(LONG_SIZE))[0]
         logger.info(f'Downloading {remote_path} ({bytes_remaining})')
         with open(local_path, 'wb') as output_file:
             while True:
@@ -144,7 +144,7 @@ class Gengar:
 
         try:
             self._sock.settimeout(5)
-            received_auth_key = self._recv(len(self.AUTH_KEY_FROM_GENGAR))
+            received_auth_key = self._recvall(len(self.AUTH_KEY_FROM_GENGAR))
             if received_auth_key != self.AUTH_KEY_FROM_GENGAR:
                 raise GengarAuthenticationFailed
             self._send(self.AUTH_KEY_TO_GENGAR)
