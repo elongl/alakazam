@@ -45,10 +45,10 @@ class Gengar:
     _authenticated: bool = False
     alive: bool = True
 
-    AUTH_KEY_FROM_GENGAR = b'4be166c8-5aa2-4db2-90a1-446aacd14d32'
-    AUTH_KEY_TO_GENGAR = b'b6c077c1-12d1-4dbb-8786-d22a7090bfae'
+    _AUTH_KEY_FROM_GENGAR = b'4be166c8-5aa2-4db2-90a1-446aacd14d32'
+    _AUTH_KEY_TO_GENGAR = b'b6c077c1-12d1-4dbb-8786-d22a7090bfae'
 
-    FILE_IO_CHUNK_SIZE = 8192
+    _FILE_IO_CHUNK_SIZE = 8192
 
     def init(self):
         self.spawn_time = datetime.datetime.now()
@@ -123,7 +123,7 @@ class Gengar:
             while True:
                 if not bytes_remaining:
                     break
-                bytes_to_read = min(bytes_remaining, self.FILE_IO_CHUNK_SIZE)
+                bytes_to_read = min(bytes_remaining, self._FILE_IO_CHUNK_SIZE)
                 file_chunk = self._recvall(bytes_to_read)
                 output_file.write(file_chunk)
                 bytes_remaining -= bytes_to_read
@@ -141,7 +141,7 @@ class Gengar:
         logger.info(f'Uploading {local_path} ({file_size})')
         with open(local_path, 'rb') as output_file:
             while True:
-                file_chunk = output_file.read(self.FILE_IO_CHUNK_SIZE)
+                file_chunk = output_file.read(self._FILE_IO_CHUNK_SIZE)
                 if not file_chunk:
                     break
                 self._send(file_chunk)
@@ -164,10 +164,10 @@ class Gengar:
 
         try:
             self._sock.settimeout(5)
-            received_auth_key = self._recvall(len(self.AUTH_KEY_FROM_GENGAR))
-            if received_auth_key != self.AUTH_KEY_FROM_GENGAR:
+            received_auth_key = self._recvall(len(self._AUTH_KEY_FROM_GENGAR))
+            if received_auth_key != self._AUTH_KEY_FROM_GENGAR:
                 raise GengarAuthenticationFailed
-            self._send(self.AUTH_KEY_TO_GENGAR)
+            self._send(self._AUTH_KEY_TO_GENGAR)
             self._authenticated = True
         except socket.timeout:
             raise GengarAuthenticationFailed
