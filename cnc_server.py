@@ -2,7 +2,6 @@ import socket
 import threading
 from dataclasses import dataclass
 
-import auth_keys
 import output
 from gengar import Gengar, GengarAuthenticationFailed
 from logger import logger
@@ -10,7 +9,6 @@ from logger import logger
 
 @dataclass
 class CNCServer:
-    auth_keys = auth_keys.get()
     port: int = 5000
 
     sock = socket.socket()
@@ -41,7 +39,7 @@ class CNCServer:
             logger.info(f'Received Gengar connection @ {gengar_host}')
             gengar = Gengar(gengar_sock, gengar_host)
             try:
-                gengar.auth(self.auth_keys)
+                gengar.auth()
                 gengar.init()
                 self._gengars.append(gengar)
             except GengarAuthenticationFailed:
