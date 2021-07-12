@@ -48,6 +48,8 @@ class Gengar:
     alive: bool = True
 
     _AUTH_KEYS = auth_keys.get()
+    _AUTH_TIMEOUT_SEC = 5
+
     _FILE_IO_CHUNK_SIZE = 8192
 
     def init(self):
@@ -163,7 +165,7 @@ class Gengar:
             return
 
         try:
-            self._sock.settimeout(5)
+            self._sock.settimeout(self._AUTH_TIMEOUT_SEC)
             received_gengar_key = self._recvall(AuthenticationKeys.KEY_LEN).decode()
             if received_gengar_key != self._AUTH_KEYS.gengar:
                 raise GengarAuthenticationFailed
