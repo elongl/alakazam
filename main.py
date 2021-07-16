@@ -1,10 +1,11 @@
 from cnc_server import CNCServer
 from logger import init_logger
 
-cnc = CNCServer()
 
 
 def main():
+    global cnc
+    cnc = CNCServer()
     init_logger()
     cnc.start()
 
