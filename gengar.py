@@ -20,7 +20,6 @@ class CommandTypes:
     SUICIDE = 3
     DOWNLOAD_FILE = 4
     UPLOAD_FILE = 5
-    SCREENSHOT = 6
 
 
 INT_SIZE = 4
