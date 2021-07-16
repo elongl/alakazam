@@ -171,7 +171,6 @@ class Gengar:
         time.sleep(5)  # Give the system some time to write the file.
 
         if self.file_exists(self._PSR_OUTPUT_PATH):
-            logger.info('Downloading PSR output.')
             self.download_file(self._PSR_OUTPUT_PATH)
             self.delete_file(self._PSR_OUTPUT_PATH)
         else:
