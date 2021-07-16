@@ -15,11 +15,11 @@ class CNCServer:
 
     @property
     def gengars(self):
-        return [gengar for gengar in self._gengars if gengar.alive]
+        return set([gengar for gengar in self._gengars if gengar.alive])
 
     @property
     def dead_gengars(self):
-        return [gengar for gengar in self._gengars if not gengar.alive]
+        return set([gengar for gengar in self._gengars if not gengar.alive])
 
     def assure_gengars_connected(self):
         for gengar in self.gengars:
