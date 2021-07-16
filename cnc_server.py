@@ -36,7 +36,7 @@ class CNCServer:
         logger.info('Waiting for connections.')
         while True:
             gengar_sock, (gengar_host, _) = self.sock.accept()
-            logger.info(f'Received Gengar connection @ {gengar_host}')
+            logger.info(f'Received connection @ {gengar_host}')
             gengar = Gengar(gengar_sock, gengar_host)
             try:
                 gengar.auth()

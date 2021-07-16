@@ -17,4 +17,4 @@ def create_output_dir():
 
 
 def generate_path(file_path: str):
-    return os.path.join(_OUTPUT_DIR_PATH, file_path, datetime.now().strftime(_DATETIME_FORMAT))
+    return os.path.join(_OUTPUT_DIR_PATH, f'{datetime.now().strftime(_DATETIME_FORMAT)}-{file_path}')

