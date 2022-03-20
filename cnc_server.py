@@ -9,7 +9,7 @@ from logger import logger
 
 @dataclass
 class CNCServer:
-    port: int = 5000
+    port: int = 8159
 
     sock = socket.socket()
     _gengars = []
