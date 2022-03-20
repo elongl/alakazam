@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class AuthenticationKeys:
-    cnc: str
+    alakazam: str
     gengar: str
 
     KEY_LEN = 36
@@ -12,10 +12,10 @@ class AuthenticationKeys:
 
 def get():
     try:
-        cnc_key = os.environb[b'CNC_KEY']
+        alakazam_key = os.environb[b'ALAKAZAM_KEY']
         gengar_key = os.environb[b'GENGAR_KEY']
-    except KeyError:
-        raise RuntimeError('Missing authentication keys.')
-    if len(cnc_key) != AuthenticationKeys.KEY_LEN or len(gengar_key) != AuthenticationKeys.KEY_LEN:
+    except KeyError as err:
+        raise RuntimeError('Missing authentication keys.') from err
+    if len(alakazam_key) != AuthenticationKeys.KEY_LEN or len(gengar_key) != AuthenticationKeys.KEY_LEN:
         raise RuntimeError('Invalid authentication keys.')
-    return AuthenticationKeys(cnc_key, gengar_key)
+    return AuthenticationKeys(alakazam_key, gengar_key)
